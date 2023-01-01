@@ -23,6 +23,17 @@ router.post("/getRecycleData", async (req, res, next) => {
   }
 });
 
+router.post("/appSettingsData", async (req, res, next) => {
+  try {
+    const [type_result] = await db.query(`SELECT * FROM typeList`);
+    const [year_result] = await db.query(`SELECT * FROM yearList`);
+    const [contact_result] = await db.query(`SELECT * FROM ContactList`);
+    res.send({ type_result, year_result, contact_result });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post("/deleteRecycleData", async (req, res, next) => {
   try {
     const { UserID } = req.body;
@@ -37,9 +48,9 @@ router.post("/deleteRecycleData", async (req, res, next) => {
 
 router.post("/createUser", async (req, res, next) => {
   try {
-    const { userAuth, userInfo } = req.body;
-    const { UserID, Password } = userAuth;
-    const { Email, Company, Mobile, Nationality, Type } = userInfo;
+    const { user } = req.body;
+    const { UserID, Password, Email, Company, Mobile, Nationality, Type } =
+      user;
 
     await db.query("INSERT INTO userAuth(UserID, Password) VALUES (?,?)", [
       UserID,
@@ -51,10 +62,10 @@ router.post("/createUser", async (req, res, next) => {
       [
         UserID,
         Company,
-        userInfo["Date Of Birth"],
-        userInfo["Employee Name"],
-        userInfo["Job Title"],
-        userInfo["Joining Date"],
+        user["Date Of Birth"],
+        user["Employee Name"],
+        user["Job Title"],
+        user["Joining Date"],
         Nationality,
         Mobile,
         Email,

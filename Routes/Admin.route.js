@@ -21,7 +21,7 @@ router.get("/", verifyAccessToken, async (req, res, next) => {
       `SELECT * FROM adminAuth WHERE Username = ?`,
       [aud]
     );
-    res.send({ fetchedUser: result[0] });
+    res.send({ user: result[0] });
   } catch (err) {
     next(err);
   }
@@ -33,30 +33,38 @@ router.post("/refresh-token", async (req, res, next) => {
     if (!refreshToken) throw createError.BadRequest();
     const userId = await verifyRefreshToken(refreshToken);
 
+    const [result] = await db.query(
+      `SELECT * FROM adminAuth WHERE Username = ?`,
+      [userId]
+    );
+
     const newAccessToken = await signAccessToken(userId);
     const newRefreshToken = await signRefreshToken(userId);
-    res.send({ accessToken: newAccessToken, refreshToken: newRefreshToken });
+    res.send({
+      user: result[0],
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    });
   } catch (err) {
     next(err);
   }
 });
 
 router.post("/login", async (req, res, next) => {
-  const { username, password } = req.body;
-  console.log(username, password);
+  const { Username, password } = req.body;
   try {
     const [result] = await db.query(
       `SELECT * FROM adminAuth WHERE Username = ?`,
-      [username]
+      [Username]
     );
     if (result.length) {
       const { Password } = result[0];
       if (password !== Password)
         throw createError.Unauthorized("Password incorrect");
       else {
-        const accessToken = await signAccessToken(username);
-        const refreshToken = await signRefreshToken(username);
-        res.send({ accessToken, refreshToken });
+        const accessToken = await signAccessToken(Username);
+        const refreshToken = await signRefreshToken(Username);
+        res.send({ user: req.body, accessToken, refreshToken });
       }
     } else throw createError.BadRequest("User Not Found");
   } catch (err) {

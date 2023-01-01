@@ -23,18 +23,12 @@ const signRefreshToken = async (userId) =>
   await genarateToken(userId, process.env.JWT_REFRESH_TOKEN_SECRET, "1y");
 
 const verifyAccessToken = (req, res, next) => {
-  //   console.log("auth", req.headers["authorization"]);
-  console.log(req.headers["authorization"]);
-  const result = req.headers["authorization"].split(" ");
-  if (!result[1]) return next(createError.Unauthorized());
-  jwt.verify(
-    result[1],
-    process.env.JWT_ACCESS_TOKEN_SECRET,
-    (err, payload) => {
-      if (err) return next(createError.Unauthorized(err.message));
-      req.payload = payload;
-    }
-  );
+  const token = req.headers.authorization;
+  if (!token) return next(createError.Unauthorized());
+  jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET, (err, payload) => {
+    if (err) return next(createError.Unauthorized(err.message));
+    req.payload = payload;
+  });
   next();
 };
 
