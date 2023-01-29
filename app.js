@@ -8,6 +8,20 @@ require("dotenv").config();
 //Internal Imports
 const AuthRoute = require("./Routes/Admin.route");
 const DBRoute = require("./Routes/DB.routes");
+const db = require("./mySQL/db_init");
+
+const def = async () => {
+  try {
+    const [result] = await db.query(`SELECT * FROM usersInfo`);
+    console.log(result);
+    // res.send({ userData: result });
+  } catch (err) {
+    // next(err);
+    console.log(err);
+  }
+};
+
+def();
 
 const app = express();
 app.use(cors());

@@ -64,7 +64,7 @@ router.post("/login", async (req, res, next) => {
       else {
         const accessToken = await signAccessToken(Username);
         const refreshToken = await signRefreshToken(Username);
-        res.send({ user: req.body, accessToken, refreshToken });
+        res.send({ user: result[0], accessToken, refreshToken });
       }
     } else throw createError.BadRequest("User Not Found");
   } catch (err) {
